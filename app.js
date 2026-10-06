@@ -1,5 +1,5 @@
 /* ==========================================================
-   #LezaDeFiesta - Código Completo con Modos Separados & Novedades
+   Empieza la Fiesta - Código Blindado con Modos Separados & Novedades
    ========================================================== */
 
 // --- 1. SINTETIZADOR DE AUDIO WEB ---
@@ -815,8 +815,8 @@ let activeCardGame = 'yoNunca';
 let currentLevel = 'fiesta';
 let cardCounter = 0;
 
-let players = JSON.parse(localStorage.getItem('leza_players')) || ['Alex', 'Laura', 'Dani'];
-let savedTheme = localStorage.getItem('leza_theme') || 'purple';
+let players = JSON.parse(localStorage.getItem('fiesta_players')) || ['Alex', 'Laura', 'Dani'];
+let savedTheme = localStorage.getItem('fiesta_theme') || 'purple';
 
 let decks = {};
 function shuffle(arr) {
@@ -1295,7 +1295,7 @@ if (brandHomeBtn) brandHomeBtn.addEventListener('click', () => switchScreen('scr
 function applyTheme(name) {
   try {
     document.body.setAttribute('data-theme', name);
-    localStorage.setItem('leza_theme', name);
+    localStorage.setItem('fiesta_theme', name);
     document.querySelectorAll('.theme-dot').forEach(d => {
       d.classList.toggle('active', d.dataset.color === name);
     });
@@ -1311,7 +1311,7 @@ document.querySelectorAll('.theme-dot').forEach(dot => {
 
 function syncPlayers() {
   try {
-    localStorage.setItem('leza_players', JSON.stringify(players));
+    localStorage.setItem('fiesta_players', JSON.stringify(players));
     if (playerBadgeCount) playerBadgeCount.innerText = players.length;
     if (homePlayerCounter) homePlayerCounter.innerText = `${players.length} personas`;
 
