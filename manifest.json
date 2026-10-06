@@ -1,0 +1,19 @@
+{
+  "name": "Empieza la Fiesta - Drinking Game",
+  "short_name": "EmpiezaFiesta",
+  "description": "El juego definitivo de fiesta con Yo Nunca, Quien es más probable, Mímica y Retos.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d14",
+  "theme_color": "#9333ea",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
