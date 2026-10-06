@@ -1,8 +1,6 @@
 /* ==========================================================
-   Empieza la Fiesta - Código Completo con Frases Reales y Novedades
+   Empieza la Fiesta - Código Completo con Modos Separados & Novedades
    ========================================================== */
-
-const APP_VERSION = "1.0";
 
 // --- 1. SINTETIZADOR DE AUDIO WEB ---
 const SoundEngine = {
@@ -67,7 +65,7 @@ function triggerHaptic() {
   if ('vibrate' in navigator) navigator.vibrate(30);
 }
 
-// --- 2. BANCO DE DATOS (100 frases por modo) ---
+// --- 2. BANCO DE DATOS (100 frases exactas por modo) ---
 const DB = {
   sips: ["1 Trago", "2 Tragos", "¡Chupito!", "Manda 2 Tragos", "1 Trago", "2 Tragos", "Trago Doble", "Manda 1 Trago"],
 
@@ -811,7 +809,7 @@ const DB = {
 
 // --- 3. ESTADO GLOBAL ---
 let currentScreen = 'screenHome';
-let activeCardGame = 'yoNunca';
+let activeCardGame = 'yoNunca'; // 'yoNunca' | 'probable' | 'mixto'
 let currentLevel = 'fiesta';
 let cardCounter = 0;
 
@@ -905,7 +903,7 @@ const btnCloseCurseModal = document.getElementById('btnCloseCurseModal');
 const newsModal = document.getElementById('newsModal');
 const btnOpenNews = document.getElementById('btnOpenNews');
 const btnCloseNewsX = document.getElementById('btnCloseNewsX');
-const btnDismissNewsForever = document.getElementById('btnDismissNewsForever');
+const btnDismissNews = document.getElementById('btnDismissNews');
 
 // --- 5. SWIPE GESTURES ---
 let startX = 0, currentX = 0, isDragging = false;
@@ -959,4 +957,440 @@ function initSwipe() {
 // --- 6. EVENTOS DE RULETA SORPRESA Y MALDICIONES ---
 function checkRandomEvents() {
   cardCounter++;
-  if
+  if (cardCounter % 8 === 0) {
+    SoundEngine.fanfare();
+    surpriseModal.style.display = 'flex';
+    wheelDisc.style.transform = 'rotate(0deg)';
+    surpriseResultText.innerText = "¡Ha saltado la Ruleta Sorpresa! Pulsa para girar.";
+    btnSpinSurpriseWheel.disabled = false;
+    return true;
+  }
+  if (cardCounter % 13 === 0) {
+    SoundEngine.beep();
+    curseDescText.innerText = DB.curses[Math.floor(Math.random() * DB.curses.length)];
+    curseModal.style.display = 'flex';
+    return true;
+  }
+  return false;
+}
+
+btnSpinSurpriseWheel.addEventListener('click', () => {
+  SoundEngine.tick();
+  btnSpinSurpriseWheel.disabled = true;
+  const randomDeg = Math.floor(Math.random() * 360) + 1440;
+  wheelDisc.style.transform = `rotate(${randomDeg}deg)`;
+
+  setTimeout(() => {
+    SoundEngine.fanfare();
+    const outcome = DB.surpriseOutcomes[Math.floor(Math.random() * DB.surpriseOutcomes.length)];
+    surpriseResultText.innerText = outcome;
+  }, 3500);
+});
+
+btnCloseSurpriseModal.addEventListener('click', () => { surpriseModal.style.display = 'none'; });
+btnCloseCurseModal.addEventListener('click', () => { curseModal.style.display = 'none'; });
+
+// --- 7. CONTROL DE PANTALLAS ---
+function switchScreen(id) {
+  triggerHaptic();
+  allScreens.forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  currentScreen = id;
+
+  document.querySelectorAll('.nav-button').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.target === id) {
+      if (btn.dataset.forcedMode && btn.dataset.forcedMode !== activeCardGame) return;
+      btn.classList.add('active');
+    }
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateModeToggleButtons() {
+  document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === activeCardGame);
+  });
+}
+
+function nextCardAction() {
+  if (checkRandomEvents()) return;
+  triggerHaptic();
+
+  let currentGameToPull = activeCardGame;
+  if (activeCardGame === 'mixto') {
+    currentGameToPull = Math.random() < 0.5 ? 'yoNunca' : 'probable';
+  }
+
+  const phrase = getCard(currentGameToPull, currentLevel);
+  const sip = DB.sips[Math.floor(Math.random() * DB.sips.length)];
+  cardSipPill.innerText = sip;
+
+  if (currentGameToPull === 'yoNunca') {
+    cardCategoryBadge.innerText = `YO NUNCA • ${currentLevel.toUpperCase()}`;
+    cardPrefixText.innerText = '';
+    cardMainText.innerText = phrase;
+  } else {
+    cardCategoryBadge.innerText = `PROBABLE • ${currentLevel.toUpperCase()}`;
+    cardPrefixText.innerText = '¿Quién es más probable que...';
+    cardMainText.innerText = phrase;
+  }
+}
+
+btnNextCard.addEventListener('click', nextCardAction);
+
+// Modos desde inicio
+document.querySelectorAll('.mode-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const launch = card.dataset.launch;
+    if (launch === 'yoNunca' || launch === 'probable' || launch === 'mixto') {
+      activeCardGame = launch;
+      updateModeToggleButtons();
+      nextCardAction();
+      switchScreen('screenCards');
+    } else if (launch === 'prefieres') {
+      nextPrefieresAction();
+      switchScreen('screenPrefieres');
+    } else if (launch === 'cultura3s') {
+      nextCulturaAction();
+      switchScreen('screenCultura');
+    } else if (launch === 'verdadReto') {
+      nextVRAction();
+      switchScreen('screenVerdadReto');
+    } else if (launch === 'mimica') {
+      startMimicaRound();
+      switchScreen('screenMimica');
+    } else if (launch === 'bomb') {
+      switchScreen('screenBomb');
+    }
+  });
+});
+
+// Selector de Modo (Solo Yo Nunca, Solo Probable o Mixto)
+document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    triggerHaptic();
+    activeCardGame = btn.dataset.mode;
+    updateModeToggleButtons();
+    nextCardAction();
+  });
+});
+
+// Prefieres
+function nextPrefieresAction() {
+  triggerHaptic();
+  const pair = DB.prefieres[Math.floor(Math.random() * DB.prefieres.length)];
+  dilemmaOptA.innerText = pair[0];
+  dilemmaOptB.innerText = pair[1];
+}
+btnNextPrefieres.addEventListener('click', nextPrefieresAction);
+
+// Cultura 3s
+function nextCulturaAction() {
+  triggerHaptic();
+  if (culturaInterval) clearInterval(culturaInterval);
+  culturaPlayer.innerText = getRandomPlayer();
+  culturaPrompt.innerText = DB.cultura3s[Math.floor(Math.random() * DB.cultura3s.length)];
+  culturaTimer.innerText = "3";
+  btnStartCultura.disabled = false;
+  btnStartCultura.style.opacity = '1';
+}
+
+btnStartCultura.addEventListener('click', () => {
+  btnStartCultura.disabled = true;
+  btnStartCultura.style.opacity = '0.5';
+  let timeLeft = 3;
+  culturaTimer.innerText = timeLeft;
+  SoundEngine.tick();
+
+  culturaInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      culturaTimer.innerText = timeLeft;
+      SoundEngine.tick();
+    } else {
+      clearInterval(culturaInterval);
+      culturaTimer.innerText = "¡TIEMPO!";
+      SoundEngine.explosion();
+    }
+  }, 1000);
+});
+
+// Verdad o Reto
+function nextVRAction() {
+  triggerHaptic();
+  vrPlayerName.innerText = getRandomPlayer();
+  vrResultText.innerText = "Elige si quieres confesar una verdad o hacer un reto.";
+}
+
+btnChooseTruth.addEventListener('click', () => {
+  SoundEngine.beep();
+  vrResultText.innerText = `😇 VERDAD: ${DB.verdades[Math.floor(Math.random() * DB.verdades.length)]}`;
+});
+btnChooseDare.addEventListener('click', () => {
+  SoundEngine.beep();
+  vrResultText.innerText = `😈 RETO: ${DB.retos[Math.floor(Math.random() * DB.retos.length)]}`;
+});
+btnNextVR.addEventListener('click', nextVRAction);
+
+// Mímica Exprés
+function startMimicaRound() {
+  triggerHaptic();
+  if (mimicaTimer) clearInterval(mimicaTimer);
+
+  mimicaStepPass.style.display = 'flex';
+  mimicaStepRead.style.display = 'none';
+  mimicaStepAct.style.display = 'none';
+
+  mimicaActorName.innerText = getRandomPlayer();
+  secretWordDisplay.innerText = DB.mimicaWords[Math.floor(Math.random() * DB.mimicaWords.length)];
+
+  let passSeconds = 10;
+  timerPassDisplay.innerText = `${passSeconds}s`;
+
+  mimicaTimer = setInterval(() => {
+    passSeconds--;
+    if (passSeconds > 0) {
+      timerPassDisplay.innerText = `${passSeconds}s`;
+      SoundEngine.tick();
+    } else {
+      clearInterval(mimicaTimer);
+      startReadPhase();
+    }
+  }, 1000);
+}
+
+btnActorReceived.addEventListener('click', () => {
+  if (mimicaTimer) clearInterval(mimicaTimer);
+  startReadPhase();
+});
+
+function startReadPhase() {
+  SoundEngine.beep();
+  mimicaStepPass.style.display = 'none';
+  mimicaStepRead.style.display = 'flex';
+  mimicaStepAct.style.display = 'none';
+
+  let readSeconds = 12;
+  timerReadDisplay.innerText = `${readSeconds}s`;
+
+  mimicaTimer = setInterval(() => {
+    readSeconds--;
+    if (readSeconds > 0) {
+      timerReadDisplay.innerText = `${readSeconds}s`;
+      SoundEngine.tick();
+    } else {
+      clearInterval(mimicaTimer);
+      startActPhase();
+    }
+  }, 1000);
+}
+
+function startActPhase() {
+  SoundEngine.fanfare();
+  mimicaStepPass.style.display = 'none';
+  mimicaStepRead.style.display = 'none';
+  mimicaStepAct.style.display = 'flex';
+
+  let actSeconds = 45;
+  timerActDisplay.innerText = actSeconds;
+
+  mimicaTimer = setInterval(() => {
+    actSeconds--;
+    if (actSeconds > 0) {
+      timerActDisplay.innerText = actSeconds;
+      if (actSeconds <= 5) SoundEngine.tick();
+    } else {
+      clearInterval(mimicaTimer);
+      timerActDisplay.innerText = "¡TIEMPO!";
+      SoundEngine.explosion();
+    }
+  }, 1000);
+}
+
+btnMimicaGuessed.addEventListener('click', () => {
+  if (mimicaTimer) clearInterval(mimicaTimer);
+  SoundEngine.fanfare();
+  timerActDisplay.innerText = "¡ACERTADO! 🎉";
+});
+
+btnNextMimicaRound.addEventListener('click', startMimicaRound);
+
+// Bomba
+btnTriggerBomb.addEventListener('click', () => {
+  triggerHaptic();
+  if (bombTimer) clearTimeout(bombTimer);
+
+  bombEmoji.innerText = '💣';
+  bombEmoji.classList.add('shaking');
+  bombSubject.innerText = DB.bombTopics[Math.floor(Math.random() * DB.bombTopics.length)];
+  btnTriggerBomb.disabled = true;
+  btnTriggerBomb.style.opacity = '0.5';
+
+  const duration = Math.floor(Math.random() * 14000) + 10000;
+  bombTimer = setTimeout(() => {
+    bombEmoji.classList.remove('shaking');
+    bombEmoji.innerText = '💥';
+    bombSubject.innerText = "¡BOOOOM! Bebe quien tenga el móvil.";
+    SoundEngine.explosion();
+    btnTriggerBomb.disabled = false;
+    btnTriggerBomb.style.opacity = '1';
+    btnTriggerBomb.innerText = 'Activar Otra Bomba';
+  }, duration);
+});
+
+// Niveles
+document.querySelectorAll('.btn-level').forEach(btn => {
+  btn.addEventListener('click', () => {
+    triggerHaptic();
+    document.querySelectorAll('.btn-level').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLevel = btn.dataset.level;
+    nextCardAction();
+  });
+});
+
+// Barra inferior
+document.querySelectorAll('.nav-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    if (btn.dataset.forcedMode) {
+      activeCardGame = btn.dataset.forcedMode;
+      updateModeToggleButtons();
+      nextCardAction();
+    }
+    switchScreen(target);
+  });
+});
+
+brandHomeBtn.addEventListener('click', () => switchScreen('screenHome'));
+
+// --- 8. TEMAS Y PARTICIPANTES ---
+function applyTheme(name) {
+  document.body.setAttribute('data-theme', name);
+  localStorage.setItem('fiesta_theme', name);
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.color === name);
+  });
+}
+
+document.querySelectorAll('.theme-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    triggerHaptic();
+    applyTheme(dot.dataset.color);
+  });
+});
+
+function syncPlayers() {
+  localStorage.setItem('fiesta_players', JSON.stringify(players));
+  playerBadgeCount.innerText = players.length;
+  homePlayerCounter.innerText = `${players.length} personas`;
+
+  const containerHome = document.getElementById('homeChipsContainer');
+  const containerModal = document.getElementById('modalChipsList');
+  containerHome.innerHTML = '';
+  containerModal.innerHTML = '';
+
+  players.forEach((p, idx) => {
+    const chip = document.createElement('span');
+    chip.className = 'player-chip';
+    chip.innerHTML = `<span>${p}</span><button onclick="removePlayer(${idx})">✕</button>`;
+    containerHome.appendChild(chip);
+    containerModal.appendChild(chip.cloneNode(true));
+  });
+}
+
+window.removePlayer = (idx) => {
+  triggerHaptic();
+  players.splice(idx, 1);
+  syncPlayers();
+};
+
+function addPlayerFrom(input) {
+  const val = input.value.trim();
+  if (val) {
+    players.push(val);
+    input.value = '';
+    syncPlayers();
+    triggerHaptic();
+  }
+}
+
+document.getElementById('formHomePlayer').addEventListener('submit', e => {
+  e.preventDefault();
+  addPlayerFrom(document.getElementById('inputHomePlayer'));
+});
+document.getElementById('formModalPlayer').addEventListener('submit', e => {
+  e.preventDefault();
+  addPlayerFrom(document.getElementById('inputModalPlayer'));
+});
+
+document.getElementById('btnOpenModal').addEventListener('click', () => {
+  triggerHaptic();
+  document.getElementById('playersModal').style.display = 'flex';
+});
+document.getElementById('btnCloseModal').addEventListener('click', () => {
+  document.getElementById('playersModal').style.display = 'none';
+});
+
+// --- 9. NOVEDADES / ACTUALIZACIONES ---
+function showNewsModal() {
+  newsModal.style.display = 'flex';
+}
+
+btnOpenNews.addEventListener('click', () => {
+  triggerHaptic();
+  showNewsModal();
+});
+
+btnCloseNewsX.addEventListener('click', () => {
+  newsModal.style.display = 'none';
+});
+
+btnDismissNews.addEventListener('click', () => {
+  triggerHaptic();
+  newsModal.style.display = 'none';
+});
+
+// --- 10. BOTÓN NATIVO PWA & OFFLINE ---
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstallApp.style.display = 'inline-block';
+});
+
+btnInstallApp.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    btnInstallApp.style.display = 'none';
+  }
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  btnInstallApp.style.display = 'none';
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// INICIALIZACIÓN
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme(savedTheme);
+  syncPlayers();
+  initSwipe();
+
+  setTimeout(() => {
+    splashScreen.style.opacity = '0';
+    setTimeout(() => {
+      splashScreen.style.visibility = 'hidden';
+      // Muestra el modal de novedades tras la carga inicial
+      showNewsModal();
+    }, 400);
+  }, 1200);
+});
