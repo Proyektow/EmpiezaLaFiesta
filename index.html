@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Empieza la Fiesta">
+  <title>Empieza la Fiesta</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="purple">
+
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <div class="splash-box">
+      <div class="splash-icon">🍹</div>
+      <h1 class="splash-title">Empieza la Fiesta</h1>
+      <p class="splash-subtitle">Drinking & Party Game</p>
+      <div class="loader-line">
+        <div class="loader-track"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra Superior -->
+  <header>
+    <div class="brand" id="brandHomeBtn">
+      <span class="brand-name">Empieza la Fiesta</span>
+    </div>
+    
+    <div class="top-controls">
+      <!-- Botón de Novedades -->
+      <button class="btn-news-icon" id="btnOpenNews" title="Novedades">📢</button>
+
+      <!-- Botón Instalar PWA -->
+      <button class="btn-install" id="btnInstallApp" style="display: none;">📲 Instalar</button>
+
+      <!-- Selector de Color -->
+      <div class="theme-palette">
+        <button class="theme-dot dot-purple active" data-color="purple" title="Morado"></button>
+        <button class="theme-dot dot-blue" data-color="blue" title="Azul"></button>
+        <button class="theme-dot dot-emerald" data-color="emerald" title="Esmeralda"></button>
+        <button class="theme-dot dot-amber" data-color="amber" title="Ámbar"></button>
+      </div>
+
+      <button class="btn-players-counter" id="btnOpenModal">
+        <span>👥</span>
+        <span id="playerBadgeCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal de Pantallas -->
+  <main>
+
+    <!-- PANTALLA 1: Inicio / Menú de Juegos -->
+    <section class="screen active" id="screenHome">
+      <div class="greeting-box">
+        <h2>¿Qué jugamos hoy?</h2>
+        <p>Elige un modo y prepara las bebidas.</p>
+      </div>
+
+      <div class="modes-grid">
+        <article class="mode-card" data-launch="yoNunca">
+          <div class="mode-icon">🍺</div>
+          <div class="mode-details">
+            <h3>Yo Nunca</h3>
+            <p>100 frases por nivel. Desliza para pasar de carta.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="probable">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-details">
+            <h3>¿Quién es más probable?</h3>
+            <p>Señala a la víctima a la de tres.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="prefieres">
+          <div class="mode-icon">⚖️</div>
+          <div class="mode-details">
+            <h3>¿Qué Prefieres?</h3>
+            <p>Dilemas incómodos. La minoría bebe.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="cultura3s">
+          <div class="mode-icon">⏱️</div>
+          <div class="mode-details">
+            <h3>Cultura Rápida (3s)</h3>
+            <p>3 respuestas en 3 segundos o trago al canto.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="verdadReto">
+          <div class="mode-icon">🎭</div>
+          <div class="mode-details">
+            <h3>Verdad o Reto</h3>
+            <p>Confesión o penitencia física obligatoria.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="mimica">
+          <div class="mode-icon">🤫</div>
+          <div class="mode-details">
+            <h3>Mímica Exprés</h3>
+            <p>Pasa el móvil, lee la palabra y 45s de actuación.</p>
+          </div>
+        </article>
+
+        <article class="mode-card" data-launch="bomb">
+          <div class="mode-icon">💣</div>
+          <div class="mode-details">
+            <h3>La Bomba</h3>
+            <p>Pasa el móvil rápido antes de que estalle.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Participantes en Inicio -->
+      <div class="home-participants-box">
+        <div class="participants-head">
+          <div>
+            <h4>Participantes</h4>
+            <span class="subtext">Turnos y retos directos</span>
+          </div>
+          <span class="counter-badge" id="homePlayerCounter">0 jugadores</span>
+        </div>
+
+        <form class="player-form-row" id="formHomePlayer">
+          <input type="text" id="inputHomePlayer" placeholder="Nombre de amigo..." maxlength="18">
+          <button type="submit">Añadir</button>
+        </form>
+
+        <div class="chips-container" id="homeChipsContainer"></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 2: Cartas Deslizables (Yo Nunca / Probable) -->
+    <section class="screen" id="screenCards">
+      <div class="intensity-bar">
+        <button class="btn-level" data-level="light">💧 Light (100)</button>
+        <button class="btn-level active" data-level="fiesta">✨ Fiesta (100)</button>
+        <button class="btn-level" data-level="hot">🔥 Hot (100)</button>
+      </div>
+
+      <div class="play-layout">
+        <div class="swipe-container" id="swipeContainer">
+          <div class="game-card" id="mainGameCard">
+            <div class="card-top-row">
+              <span class="card-badge" id="cardCategoryBadge">YO NUNCA</span>
+              <span class="sip-pill" id="cardSipPill">1 Trago</span>
+            </div>
+            <div class="card-text-wrapper">
+              <p class="question-prefix" id="cardPrefixText"></p>
+              <p class="question-text" id="cardMainText">Cargando...</p>
+            </div>
+            <p class="card-rule" id="cardRuleNote">Desliza hacia los lados o pulsa abajo</p>
+          </div>
+        </div>
+        <button class="btn-main-action" id="btnNextCard">Siguiente Tarjeta ➔</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 3: ¿Qué Prefieres? -->
+    <section class="screen" id="screenPrefieres">
+      <div class="play-layout">
+        <div class="game-card no-swipe">
+          <span class="card-badge">⚖️ ¿QUÉ PREFIERES?</span>
+          <div class="dilemma-box">
+            <button class="dilemma-btn" id="dilemmaOptA">Opción A</button>
+            <div class="dilemma-divider">O BIEN</div>
+            <button class="dilemma-btn" id="dilemmaOptB">Opción B</button>
+          </div>
+          <p class="card-rule">Votad todos a la vez. Quien quede en minoría, bebe.</p>
+        </div>
+        <button class="btn-main-action" id="btnNextPrefieres">Siguiente Dilema ➔</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 4: Cultura Rápida (3 Segundos) -->
+    <section class="screen" id="screenCultura">
+      <div class="play-layout">
+        <div class="game-card no-swipe" id="culturaCard">
+          <span class="card-badge">⏱️ CULTURA RÁPIDA</span>
+          <div class="card-text-wrapper">
+            <span class="sub-label">LE TOCA A:</span>
+            <div class="victim-display" id="culturaPlayer">Alguien</div>
+            <p class="question-text" id="culturaPrompt">Pulsa iniciar para arrancar los 3 segundos.</p>
+          </div>
+          <div class="timer-display-big" id="culturaTimer">3</div>
+        </div>
+        <button class="btn-main-action" id="btnStartCultura">¡Arrancar 3 Segundos!</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 5: Verdad o Reto -->
+    <section class="screen" id="screenVerdadReto">
+      <div class="play-layout">
+        <div class="game-card no-swipe">
+          <span class="card-badge">🎭 VERDAD O RETO</span>
+          <div class="card-text-wrapper">
+            <span class="sub-label">JUGADOR SELECCIONADO:</span>
+            <div class="victim-display" id="vrPlayerName">Alguien</div>
+            <p class="question-text" id="vrResultText">Elige si quieres confesar una verdad o afrontar un reto.</p>
+          </div>
+          <div class="vr-button-group" id="vrControls">
+            <button class="btn-vr btn-truth" id="btnChooseTruth">😇 Verdad</button>
+            <button class="btn-vr btn-dare" id="btnChooseDare">😈 Reto</button>
+          </div>
+        </div>
+        <button class="btn-main-action" id="btnNextVR">Siguiente Jugador ➔</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 6: Mímica Exprés -->
+    <section class="screen" id="screenMimica">
+      <div class="play-layout">
+        <div class="game-card no-swipe">
+          <span class="card-badge">🤫 MÍMICA EXPRÉS</span>
+
+          <!-- Fase 1: Pasar el móvil -->
+          <div class="mimica-step" id="mimicaStepPass">
+            <span class="sub-label">PASA EL MÓVIL EN PRIVADO A:</span>
+            <div class="victim-display" id="mimicaActorName">Actor</div>
+            <p class="question-text">Pásale el teléfono antes de que se acabe el tiempo.</p>
+            <div class="timer-display-medium" id="timerPassDisplay">10s</div>
+            <button class="btn-received" id="btnActorReceived">¡Móvil Recibido!</button>
+          </div>
+
+          <!-- Fase 2: Memorizar palabra -->
+          <div class="mimica-step" id="mimicaStepRead" style="display: none;">
+            <span class="sub-label">MEMORIZA EN SECRETO (12s):</span>
+            <div class="secret-word-box" id="secretWordDisplay">Palabra</div>
+            <p class="card-rule">No hables ni hagas sonidos. El tiempo corre...</p>
+            <div class="timer-display-medium" id="timerReadDisplay">12s</div>
+          </div>
+
+          <!-- Fase 3: Actuación -->
+          <div class="mimica-step" id="mimicaStepAct" style="display: none;">
+            <span class="sub-label">¡ACTÚA YA! (MÁX 45s):</span>
+            <div class="timer-display-big timer-active" id="timerActDisplay">45</div>
+            <p class="card-rule">Sin palabras ni sonidos. ¡Que adivinen!</p>
+            <button class="btn-success-guessed" id="btnMimicaGuessed">🎉 ¡Acertado!</button>
+          </div>
+
+        </div>
+        <button class="btn-main-action" id="btnNextMimicaRound">Siguiente Ronda ➔</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 7: La Bomba -->
+    <section class="screen" id="screenBomb">
+      <div class="play-layout">
+        <div class="game-card no-swipe" id="bombPlayCard">
+          <div class="bomb-icon" id="bombEmoji">💣</div>
+          <div class="card-text-wrapper">
+            <span class="sub-label">TEMA DE LA RONDA:</span>
+            <p class="question-text" id="bombSubject">Pulsa para activar la mecha</p>
+          </div>
+          <p class="card-rule" id="bombFootnote">Decid una palabra válida y pasad el móvil.</p>
+        </div>
+        <button class="btn-main-action" id="btnTriggerBomb">Activar Bomba</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Barra Inferior -->
+  <nav class="bottom-bar">
+    <button class="nav-button active" data-target="screenHome">
+      <span class="b-icon">🏠</span>
+      <span class="b-label">Inicio</span>
+    </button>
+    <button class="nav-button" data-target="screenCards" data-mode="yoNunca">
+      <span class="b-icon">🍺</span>
+      <span class="b-label">Yo Nunca</span>
+    </button>
+    <button class="nav-button" data-target="screenCards" data-mode="probable">
+      <span class="b-icon">🎯</span>
+      <span class="b-label">Probable</span>
+    </button>
+    <button class="nav-button" data-target="screenPrefieres">
+      <span class="b-icon">⚖️</span>
+      <span class="b-label">Prefieres</span>
+    </button>
+    <button class="nav-button" data-target="screenCultura">
+      <span class="b-icon">⏱️</span>
+      <span class="b-label">Cultura 3s</span>
+    </button>
+    <button class="nav-button" data-target="screenMimica">
+      <span class="b-icon">🤫</span>
+      <span class="b-label">Mímica</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: Ruleta Sorpresa -->
+  <div class="modal-wrapper" id="surpriseModal">
+    <div class="modal-card surprise-card">
+      <span class="card-badge" style="background:#f59e0b; color:#000;">⚡ ¡RULETA DE LA SUERTE!</span>
+      <h3 style="margin-top:10px;">Gira la ruleta sorpresa</h3>
+      <div class="roulette-wheel-container">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel-disc" id="wheelDisc">
+          <div class="wheel-center">🎯</div>
+        </div>
+      </div>
+      <div class="surprise-result-text" id="surpriseResultText">Pulsa girar para ver el castigo del grupo.</div>
+      <button class="btn-main-action" id="btnSpinSurpriseWheel">🎲 Girar Ruleta</button>
+      <button class="btn-close-link" id="btnCloseSurpriseModal">Continuar Partida</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Reglas Malditas -->
+  <div class="modal-wrapper" id="curseModal">
+    <div class="modal-card curse-card">
+      <span class="card-badge" style="background:#ef4444; color:#fff;">💀 ¡REGLA MALDITA ACTIVADA!</span>
+      <p class="curse-turns" id="curseTurnsText">Durante las próximas 5 tarjetas:</p>
+      <h3 class="curse-desc" id="curseDescText">Descripción de la regla...</h3>
+      <p class="card-rule">¡1 trago cada vez que alguien la rompa!</p>
+      <button class="btn-main-action" id="btnCloseCurseModal" style="background:#ef4444;">¡Aceptado!</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Participantes -->
+  <div class="modal-wrapper" id="playersModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Lista de Jugadores</h3>
+        <button class="btn-close-modal" id="btnCloseModal">✕</button>
+      </div>
+      <form class="player-form-row" id="formModalPlayer">
+        <input type="text" id="inputModalPlayer" placeholder="Nuevo jugador..." maxlength="18" required>
+        <button type="submit">+</button>
+      </form>
+      <div class="chips-container" id="modalChipsList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Actualizaciones / Novedades -->
+  <div class="modal-wrapper" id="newsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.4rem;">🍹</span>
+          <div>
+            <h3 style="margin:0;">Empieza la Fiesta v1.0</h3>
+            <span style="font-size:0.7rem; color:var(--text-muted);">Bienvenido al juego</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseNewsX">✕</button>
+      </div>
+
+      <div class="news-body">
+        <div class="news-item">
+          <strong>🔥 +600 Frases Reales:</strong> 100 tarjetas únicas por nivel en Yo Nunca y Probable.
+        </div>
+        <div class="news-item">
+          <strong>🖐️ Deslizar Cartas (Swipe):</strong> Arrastra a izquierda o derecha estilo Tinder para pasar de frase.
+        </div>
+        <div class="news-item">
+          <strong>🤫 Modo Mímica Exprés:</strong> Temporizador de 10s para pasar el móvil, 12s de lectura privada y 45s de mímica.
+        </div>
+        <div class="news-item">
+          <strong>🔊 Audio Web Integrado:</strong> Efectos sonoros de tictac, mecha, clics y explosiones sin descargar archivos pesados.
+        </div>
+      </div>
+
+      <div class="news-footer">
+        <button class="btn-news-ok" id="btnDismissNewsForever">¡Entendido, a jugar!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
