@@ -1,5 +1,5 @@
 /* ==========================================================
-   #LezaDeFiesta - Estilos Globales, Temas y Modales
+   Empieza la Fiesta - Estilos Globales, Temas y Modales
    ========================================================== */
 
 :root {
@@ -52,7 +52,7 @@ body {
   transition: background-color 0.3s;
 }
 
-/* Splash Screen (Se oculta sola por CSS obligatoriamente tras 1.5s) */
+/* Splash Screen (Se oculta sola por CSS obligatoriamente tras 1.5s sin bloquear clics) */
 #splash-screen {
   position: fixed;
   inset: 0;
