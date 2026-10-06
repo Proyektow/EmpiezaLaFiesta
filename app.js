@@ -1,5 +1,5 @@
 /* ==========================================================
-   Empieza la Fiesta - Código Completo con Modos Separados & Novedades
+   #LezaDeFiesta - Código Completo con Modos Separados & Novedades
    ========================================================== */
 
 // --- 1. SINTETIZADOR DE AUDIO WEB ---
@@ -61,11 +61,13 @@ const SoundEngine = {
 };
 
 function triggerHaptic() {
-  SoundEngine.click();
-  if ('vibrate' in navigator) navigator.vibrate(30);
+  try {
+    SoundEngine.click();
+    if ('vibrate' in navigator) navigator.vibrate(30);
+  } catch (e) {}
 }
 
-// --- 2. BANCO DE DATOS (100 frases exactas por modo) ---
+// --- 2. BANCO DE DATOS (100 frases por modo) ---
 const DB = {
   sips: ["1 Trago", "2 Tragos", "¡Chupito!", "Manda 2 Tragos", "1 Trago", "2 Tragos", "Trago Doble", "Manda 1 Trago"],
 
@@ -809,12 +811,12 @@ const DB = {
 
 // --- 3. ESTADO GLOBAL ---
 let currentScreen = 'screenHome';
-let activeCardGame = 'yoNunca'; // 'yoNunca' | 'probable' | 'mixto'
+let activeCardGame = 'yoNunca';
 let currentLevel = 'fiesta';
 let cardCounter = 0;
 
-let players = JSON.parse(localStorage.getItem('fiesta_players')) || ['Alex', 'Laura', 'Dani'];
-let savedTheme = localStorage.getItem('fiesta_theme') || 'purple';
+let players = JSON.parse(localStorage.getItem('leza_players')) || ['Alex', 'Laura', 'Dani'];
+let savedTheme = localStorage.getItem('leza_theme') || 'purple';
 
 let decks = {};
 function shuffle(arr) {
@@ -945,13 +947,14 @@ function initSwipe() {
     }
   };
 
-  swipeContainer.addEventListener('touchstart', e => onStart(e.touches[0].clientX));
-  swipeContainer.addEventListener('touchmove', e => onMove(e.touches[0].clientX));
-  swipeContainer.addEventListener('touchend', onEnd);
-
-  swipeContainer.addEventListener('mousedown', e => onStart(e.clientX));
-  window.addEventListener('mousemove', e => { if (isDragging) onMove(e.clientX); });
-  window.addEventListener('mouseup', onEnd);
+  if (swipeContainer) {
+    swipeContainer.addEventListener('touchstart', e => onStart(e.touches[0].clientX));
+    swipeContainer.addEventListener('touchmove', e => onMove(e.touches[0].clientX));
+    swipeContainer.addEventListener('touchend', onEnd);
+    swipeContainer.addEventListener('mousedown', e => onStart(e.clientX));
+    window.addEventListener('mousemove', e => { if (isDragging) onMove(e.clientX); });
+    window.addEventListener('mouseup', onEnd);
+  }
 }
 
 // --- 6. EVENTOS DE RULETA SORPRESA Y MALDICIONES ---
@@ -974,27 +977,30 @@ function checkRandomEvents() {
   return false;
 }
 
-btnSpinSurpriseWheel.addEventListener('click', () => {
-  SoundEngine.tick();
-  btnSpinSurpriseWheel.disabled = true;
-  const randomDeg = Math.floor(Math.random() * 360) + 1440;
-  wheelDisc.style.transform = `rotate(${randomDeg}deg)`;
+if (btnSpinSurpriseWheel) {
+  btnSpinSurpriseWheel.addEventListener('click', () => {
+    SoundEngine.tick();
+    btnSpinSurpriseWheel.disabled = true;
+    const randomDeg = Math.floor(Math.random() * 360) + 1440;
+    wheelDisc.style.transform = `rotate(${randomDeg}deg)`;
 
-  setTimeout(() => {
-    SoundEngine.fanfare();
-    const outcome = DB.surpriseOutcomes[Math.floor(Math.random() * DB.surpriseOutcomes.length)];
-    surpriseResultText.innerText = outcome;
-  }, 3500);
-});
+    setTimeout(() => {
+      SoundEngine.fanfare();
+      const outcome = DB.surpriseOutcomes[Math.floor(Math.random() * DB.surpriseOutcomes.length)];
+      surpriseResultText.innerText = outcome;
+    }, 3500);
+  });
+}
 
-btnCloseSurpriseModal.addEventListener('click', () => { surpriseModal.style.display = 'none'; });
-btnCloseCurseModal.addEventListener('click', () => { curseModal.style.display = 'none'; });
+if (btnCloseSurpriseModal) btnCloseSurpriseModal.addEventListener('click', () => { surpriseModal.style.display = 'none'; });
+if (btnCloseCurseModal) btnCloseCurseModal.addEventListener('click', () => { curseModal.style.display = 'none'; });
 
 // --- 7. CONTROL DE PANTALLAS ---
 function switchScreen(id) {
   triggerHaptic();
   allScreens.forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const targetElement = document.getElementById(id);
+  if (targetElement) targetElement.classList.add('active');
   currentScreen = id;
 
   document.querySelectorAll('.nav-button').forEach(btn => {
@@ -1024,20 +1030,20 @@ function nextCardAction() {
 
   const phrase = getCard(currentGameToPull, currentLevel);
   const sip = DB.sips[Math.floor(Math.random() * DB.sips.length)];
-  cardSipPill.innerText = sip;
+  if (cardSipPill) cardSipPill.innerText = sip;
 
   if (currentGameToPull === 'yoNunca') {
-    cardCategoryBadge.innerText = `YO NUNCA • ${currentLevel.toUpperCase()}`;
-    cardPrefixText.innerText = '';
-    cardMainText.innerText = phrase;
+    if (cardCategoryBadge) cardCategoryBadge.innerText = `YO NUNCA • ${currentLevel.toUpperCase()}`;
+    if (cardPrefixText) cardPrefixText.innerText = '';
+    if (cardMainText) cardMainText.innerText = phrase;
   } else {
-    cardCategoryBadge.innerText = `PROBABLE • ${currentLevel.toUpperCase()}`;
-    cardPrefixText.innerText = '¿Quién es más probable que...';
-    cardMainText.innerText = phrase;
+    if (cardCategoryBadge) cardCategoryBadge.innerText = `PROBABLE • ${currentLevel.toUpperCase()}`;
+    if (cardPrefixText) cardPrefixText.innerText = '¿Quién es más probable que...';
+    if (cardMainText) cardMainText.innerText = phrase;
   }
 }
 
-btnNextCard.addEventListener('click', nextCardAction);
+if (btnNextCard) btnNextCard.addEventListener('click', nextCardAction);
 
 // Modos desde inicio
 document.querySelectorAll('.mode-card').forEach(card => {
@@ -1080,78 +1086,88 @@ document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
 function nextPrefieresAction() {
   triggerHaptic();
   const pair = DB.prefieres[Math.floor(Math.random() * DB.prefieres.length)];
-  dilemmaOptA.innerText = pair[0];
-  dilemmaOptB.innerText = pair[1];
+  if (dilemmaOptA && dilemmaOptB) {
+    dilemmaOptA.innerText = pair[0];
+    dilemmaOptB.innerText = pair[1];
+  }
 }
-btnNextPrefieres.addEventListener('click', nextPrefieresAction);
+if (btnNextPrefieres) btnNextPrefieres.addEventListener('click', nextPrefieresAction);
 
 // Cultura 3s
 function nextCulturaAction() {
   triggerHaptic();
   if (culturaInterval) clearInterval(culturaInterval);
-  culturaPlayer.innerText = getRandomPlayer();
-  culturaPrompt.innerText = DB.cultura3s[Math.floor(Math.random() * DB.cultura3s.length)];
-  culturaTimer.innerText = "3";
-  btnStartCultura.disabled = false;
-  btnStartCultura.style.opacity = '1';
+  if (culturaPlayer) culturaPlayer.innerText = getRandomPlayer();
+  if (culturaPrompt) culturaPrompt.innerText = DB.cultura3s[Math.floor(Math.random() * DB.cultura3s.length)];
+  if (culturaTimer) culturaTimer.innerText = "3";
+  if (btnStartCultura) {
+    btnStartCultura.disabled = false;
+    btnStartCultura.style.opacity = '1';
+  }
 }
 
-btnStartCultura.addEventListener('click', () => {
-  btnStartCultura.disabled = true;
-  btnStartCultura.style.opacity = '0.5';
-  let timeLeft = 3;
-  culturaTimer.innerText = timeLeft;
-  SoundEngine.tick();
+if (btnStartCultura) {
+  btnStartCultura.addEventListener('click', () => {
+    btnStartCultura.disabled = true;
+    btnStartCultura.style.opacity = '0.5';
+    let timeLeft = 3;
+    if (culturaTimer) culturaTimer.innerText = timeLeft;
+    SoundEngine.tick();
 
-  culturaInterval = setInterval(() => {
-    timeLeft--;
-    if (timeLeft > 0) {
-      culturaTimer.innerText = timeLeft;
-      SoundEngine.tick();
-    } else {
-      clearInterval(culturaInterval);
-      culturaTimer.innerText = "¡TIEMPO!";
-      SoundEngine.explosion();
-    }
-  }, 1000);
-});
+    culturaInterval = setInterval(() => {
+      timeLeft--;
+      if (timeLeft > 0) {
+        if (culturaTimer) culturaTimer.innerText = timeLeft;
+        SoundEngine.tick();
+      } else {
+        clearInterval(culturaInterval);
+        if (culturaTimer) culturaTimer.innerText = "¡TIEMPO!";
+        SoundEngine.explosion();
+      }
+    }, 1000);
+  });
+}
 
 // Verdad o Reto
 function nextVRAction() {
   triggerHaptic();
-  vrPlayerName.innerText = getRandomPlayer();
-  vrResultText.innerText = "Elige si quieres confesar una verdad o hacer un reto.";
+  if (vrPlayerName) vrPlayerName.innerText = getRandomPlayer();
+  if (vrResultText) vrResultText.innerText = "Elige si quieres confesar una verdad o hacer un reto.";
 }
 
-btnChooseTruth.addEventListener('click', () => {
-  SoundEngine.beep();
-  vrResultText.innerText = `😇 VERDAD: ${DB.verdades[Math.floor(Math.random() * DB.verdades.length)]}`;
-});
-btnChooseDare.addEventListener('click', () => {
-  SoundEngine.beep();
-  vrResultText.innerText = `😈 RETO: ${DB.retos[Math.floor(Math.random() * DB.retos.length)]}`;
-});
-btnNextVR.addEventListener('click', nextVRAction);
+if (btnChooseTruth) {
+  btnChooseTruth.addEventListener('click', () => {
+    SoundEngine.beep();
+    if (vrResultText) vrResultText.innerText = `😇 VERDAD: ${DB.verdades[Math.floor(Math.random() * DB.verdades.length)]}`;
+  });
+}
+if (btnChooseDare) {
+  btnChooseDare.addEventListener('click', () => {
+    SoundEngine.beep();
+    if (vrResultText) vrResultText.innerText = `😈 RETO: ${DB.retos[Math.floor(Math.random() * DB.retos.length)]}`;
+  });
+}
+if (btnNextVR) btnNextVR.addEventListener('click', nextVRAction);
 
 // Mímica Exprés
 function startMimicaRound() {
   triggerHaptic();
   if (mimicaTimer) clearInterval(mimicaTimer);
 
-  mimicaStepPass.style.display = 'flex';
-  mimicaStepRead.style.display = 'none';
-  mimicaStepAct.style.display = 'none';
+  if (mimicaStepPass) mimicaStepPass.style.display = 'flex';
+  if (mimicaStepRead) mimicaStepRead.style.display = 'none';
+  if (mimicaStepAct) mimicaStepAct.style.display = 'none';
 
-  mimicaActorName.innerText = getRandomPlayer();
-  secretWordDisplay.innerText = DB.mimicaWords[Math.floor(Math.random() * DB.mimicaWords.length)];
+  if (mimicaActorName) mimicaActorName.innerText = getRandomPlayer();
+  if (secretWordDisplay) secretWordDisplay.innerText = DB.mimicaWords[Math.floor(Math.random() * DB.mimicaWords.length)];
 
   let passSeconds = 10;
-  timerPassDisplay.innerText = `${passSeconds}s`;
+  if (timerPassDisplay) timerPassDisplay.innerText = `${passSeconds}s`;
 
   mimicaTimer = setInterval(() => {
     passSeconds--;
     if (passSeconds > 0) {
-      timerPassDisplay.innerText = `${passSeconds}s`;
+      if (timerPassDisplay) timerPassDisplay.innerText = `${passSeconds}s`;
       SoundEngine.tick();
     } else {
       clearInterval(mimicaTimer);
@@ -1160,24 +1176,26 @@ function startMimicaRound() {
   }, 1000);
 }
 
-btnActorReceived.addEventListener('click', () => {
-  if (mimicaTimer) clearInterval(mimicaTimer);
-  startReadPhase();
-});
+if (btnActorReceived) {
+  btnActorReceived.addEventListener('click', () => {
+    if (mimicaTimer) clearInterval(mimicaTimer);
+    startReadPhase();
+  });
+}
 
 function startReadPhase() {
   SoundEngine.beep();
-  mimicaStepPass.style.display = 'none';
-  mimicaStepRead.style.display = 'flex';
-  mimicaStepAct.style.display = 'none';
+  if (mimicaStepPass) mimicaStepPass.style.display = 'none';
+  if (mimicaStepRead) mimicaStepRead.style.display = 'flex';
+  if (mimicaStepAct) mimicaStepAct.style.display = 'none';
 
   let readSeconds = 12;
-  timerReadDisplay.innerText = `${readSeconds}s`;
+  if (timerReadDisplay) timerReadDisplay.innerText = `${readSeconds}s`;
 
   mimicaTimer = setInterval(() => {
     readSeconds--;
     if (readSeconds > 0) {
-      timerReadDisplay.innerText = `${readSeconds}s`;
+      if (timerReadDisplay) timerReadDisplay.innerText = `${readSeconds}s`;
       SoundEngine.tick();
     } else {
       clearInterval(mimicaTimer);
@@ -1188,56 +1206,64 @@ function startReadPhase() {
 
 function startActPhase() {
   SoundEngine.fanfare();
-  mimicaStepPass.style.display = 'none';
-  mimicaStepRead.style.display = 'none';
-  mimicaStepAct.style.display = 'flex';
+  if (mimicaStepPass) mimicaStepPass.style.display = 'none';
+  if (mimicaStepRead) mimicaStepRead.style.display = 'none';
+  if (mimicaStepAct) mimicaStepAct.style.display = 'flex';
 
   let actSeconds = 45;
-  timerActDisplay.innerText = actSeconds;
+  if (timerActDisplay) timerActDisplay.innerText = actSeconds;
 
   mimicaTimer = setInterval(() => {
     actSeconds--;
     if (actSeconds > 0) {
-      timerActDisplay.innerText = actSeconds;
+      if (timerActDisplay) timerActDisplay.innerText = actSeconds;
       if (actSeconds <= 5) SoundEngine.tick();
     } else {
       clearInterval(mimicaTimer);
-      timerActDisplay.innerText = "¡TIEMPO!";
+      if (timerActDisplay) timerActDisplay.innerText = "¡TIEMPO!";
       SoundEngine.explosion();
     }
   }, 1000);
 }
 
-btnMimicaGuessed.addEventListener('click', () => {
-  if (mimicaTimer) clearInterval(mimicaTimer);
-  SoundEngine.fanfare();
-  timerActDisplay.innerText = "¡ACERTADO! 🎉";
-});
+if (btnMimicaGuessed) {
+  btnMimicaGuessed.addEventListener('click', () => {
+    if (mimicaTimer) clearInterval(mimicaTimer);
+    SoundEngine.fanfare();
+    if (timerActDisplay) timerActDisplay.innerText = "¡ACERTADO! 🎉";
+  });
+}
 
-btnNextMimicaRound.addEventListener('click', startMimicaRound);
+if (btnNextMimicaRound) btnNextMimicaRound.addEventListener('click', startMimicaRound);
 
 // Bomba
-btnTriggerBomb.addEventListener('click', () => {
-  triggerHaptic();
-  if (bombTimer) clearTimeout(bombTimer);
+if (btnTriggerBomb) {
+  btnTriggerBomb.addEventListener('click', () => {
+    triggerHaptic();
+    if (bombTimer) clearTimeout(bombTimer);
 
-  bombEmoji.innerText = '💣';
-  bombEmoji.classList.add('shaking');
-  bombSubject.innerText = DB.bombTopics[Math.floor(Math.random() * DB.bombTopics.length)];
-  btnTriggerBomb.disabled = true;
-  btnTriggerBomb.style.opacity = '0.5';
+    if (bombEmoji) {
+      bombEmoji.innerText = '💣';
+      bombEmoji.classList.add('shaking');
+    }
+    if (bombSubject) bombSubject.innerText = DB.bombTopics[Math.floor(Math.random() * DB.bombTopics.length)];
+    btnTriggerBomb.disabled = true;
+    btnTriggerBomb.style.opacity = '0.5';
 
-  const duration = Math.floor(Math.random() * 14000) + 10000;
-  bombTimer = setTimeout(() => {
-    bombEmoji.classList.remove('shaking');
-    bombEmoji.innerText = '💥';
-    bombSubject.innerText = "¡BOOOOM! Bebe quien tenga el móvil.";
-    SoundEngine.explosion();
-    btnTriggerBomb.disabled = false;
-    btnTriggerBomb.style.opacity = '1';
-    btnTriggerBomb.innerText = 'Activar Otra Bomba';
-  }, duration);
-});
+    const duration = Math.floor(Math.random() * 14000) + 10000;
+    bombTimer = setTimeout(() => {
+      if (bombEmoji) {
+        bombEmoji.classList.remove('shaking');
+        bombEmoji.innerText = '💥';
+      }
+      if (bombSubject) bombSubject.innerText = "¡BOOOOM! Bebe quien tenga el móvil.";
+      SoundEngine.explosion();
+      btnTriggerBomb.disabled = false;
+      btnTriggerBomb.style.opacity = '1';
+      btnTriggerBomb.innerText = 'Activar Otra Bomba';
+    }, duration);
+  });
+}
 
 // Niveles
 document.querySelectorAll('.btn-level').forEach(btn => {
@@ -1263,15 +1289,17 @@ document.querySelectorAll('.nav-button').forEach(btn => {
   });
 });
 
-brandHomeBtn.addEventListener('click', () => switchScreen('screenHome'));
+if (brandHomeBtn) brandHomeBtn.addEventListener('click', () => switchScreen('screenHome'));
 
 // --- 8. TEMAS Y PARTICIPANTES ---
 function applyTheme(name) {
-  document.body.setAttribute('data-theme', name);
-  localStorage.setItem('fiesta_theme', name);
-  document.querySelectorAll('.theme-dot').forEach(d => {
-    d.classList.toggle('active', d.dataset.color === name);
-  });
+  try {
+    document.body.setAttribute('data-theme', name);
+    localStorage.setItem('leza_theme', name);
+    document.querySelectorAll('.theme-dot').forEach(d => {
+      d.classList.toggle('active', d.dataset.color === name);
+    });
+  } catch (e) {}
 }
 
 document.querySelectorAll('.theme-dot').forEach(dot => {
@@ -1282,22 +1310,24 @@ document.querySelectorAll('.theme-dot').forEach(dot => {
 });
 
 function syncPlayers() {
-  localStorage.setItem('fiesta_players', JSON.stringify(players));
-  playerBadgeCount.innerText = players.length;
-  homePlayerCounter.innerText = `${players.length} personas`;
+  try {
+    localStorage.setItem('leza_players', JSON.stringify(players));
+    if (playerBadgeCount) playerBadgeCount.innerText = players.length;
+    if (homePlayerCounter) homePlayerCounter.innerText = `${players.length} personas`;
 
-  const containerHome = document.getElementById('homeChipsContainer');
-  const containerModal = document.getElementById('modalChipsList');
-  containerHome.innerHTML = '';
-  containerModal.innerHTML = '';
+    const containerHome = document.getElementById('homeChipsContainer');
+    const containerModal = document.getElementById('modalChipsList');
+    if (containerHome) containerHome.innerHTML = '';
+    if (containerModal) containerModal.innerHTML = '';
 
-  players.forEach((p, idx) => {
-    const chip = document.createElement('span');
-    chip.className = 'player-chip';
-    chip.innerHTML = `<span>${p}</span><button onclick="removePlayer(${idx})">✕</button>`;
-    containerHome.appendChild(chip);
-    containerModal.appendChild(chip.cloneNode(true));
-  });
+    players.forEach((p, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'player-chip';
+      chip.innerHTML = `<span>${p}</span><button onclick="removePlayer(${idx})">✕</button>`;
+      if (containerHome) containerHome.appendChild(chip);
+      if (containerModal) containerModal.appendChild(chip.cloneNode(true));
+    });
+  } catch (e) {}
 }
 
 window.removePlayer = (idx) => {
@@ -1307,6 +1337,7 @@ window.removePlayer = (idx) => {
 };
 
 function addPlayerFrom(input) {
+  if (!input) return;
   const val = input.value.trim();
   if (val) {
     players.push(val);
@@ -1316,41 +1347,63 @@ function addPlayerFrom(input) {
   }
 }
 
-document.getElementById('formHomePlayer').addEventListener('submit', e => {
-  e.preventDefault();
-  addPlayerFrom(document.getElementById('inputHomePlayer'));
-});
-document.getElementById('formModalPlayer').addEventListener('submit', e => {
-  e.preventDefault();
-  addPlayerFrom(document.getElementById('inputModalPlayer'));
-});
+const formHome = document.getElementById('formHomePlayer');
+if (formHome) {
+  formHome.addEventListener('submit', e => {
+    e.preventDefault();
+    addPlayerFrom(document.getElementById('inputHomePlayer'));
+  });
+}
 
-document.getElementById('btnOpenModal').addEventListener('click', () => {
-  triggerHaptic();
-  document.getElementById('playersModal').style.display = 'flex';
-});
-document.getElementById('btnCloseModal').addEventListener('click', () => {
-  document.getElementById('playersModal').style.display = 'none';
-});
+const formModal = document.getElementById('formModalPlayer');
+if (formModal) {
+  formModal.addEventListener('submit', e => {
+    e.preventDefault();
+    addPlayerFrom(document.getElementById('inputModalPlayer'));
+  });
+}
+
+const btnOpenM = document.getElementById('btnOpenModal');
+if (btnOpenM) {
+  btnOpenM.addEventListener('click', () => {
+    triggerHaptic();
+    const modal = document.getElementById('playersModal');
+    if (modal) modal.style.display = 'flex';
+  });
+}
+
+const btnCloseM = document.getElementById('btnCloseModal');
+if (btnCloseM) {
+  btnCloseM.addEventListener('click', () => {
+    const modal = document.getElementById('playersModal');
+    if (modal) modal.style.display = 'none';
+  });
+}
 
 // --- 9. NOVEDADES / ACTUALIZACIONES ---
 function showNewsModal() {
-  newsModal.style.display = 'flex';
+  if (newsModal) newsModal.style.display = 'flex';
 }
 
-btnOpenNews.addEventListener('click', () => {
-  triggerHaptic();
-  showNewsModal();
-});
+if (btnOpenNews) {
+  btnOpenNews.addEventListener('click', () => {
+    triggerHaptic();
+    showNewsModal();
+  });
+}
 
-btnCloseNewsX.addEventListener('click', () => {
-  newsModal.style.display = 'none';
-});
+if (btnCloseNewsX) {
+  btnCloseNewsX.addEventListener('click', () => {
+    if (newsModal) newsModal.style.display = 'none';
+  });
+}
 
-btnDismissNews.addEventListener('click', () => {
-  triggerHaptic();
-  newsModal.style.display = 'none';
-});
+if (btnDismissNews) {
+  btnDismissNews.addEventListener('click', () => {
+    triggerHaptic();
+    if (newsModal) newsModal.style.display = 'none';
+  });
+}
 
 // --- 10. BOTÓN NATIVO PWA & OFFLINE ---
 let deferredPrompt = null;
@@ -1358,39 +1411,50 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  btnInstallApp.style.display = 'inline-block';
+  if (btnInstallApp) btnInstallApp.style.display = 'inline-block';
 });
 
-btnInstallApp.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') {
-    btnInstallApp.style.display = 'none';
-  }
-  deferredPrompt = null;
-});
+if (btnInstallApp) {
+  btnInstallApp.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      btnInstallApp.style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
 
 window.addEventListener('appinstalled', () => {
-  btnInstallApp.style.display = 'none';
+  if (btnInstallApp) btnInstallApp.style.display = 'none';
 });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-// INICIALIZACIÓN
+// INICIALIZACIÓN BLINDADA (A PRUEBA DE FALLOS)
 window.addEventListener('DOMContentLoaded', () => {
-  applyTheme(savedTheme);
-  syncPlayers();
-  initSwipe();
+  try {
+    applyTheme(savedTheme);
+    syncPlayers();
+    initSwipe();
+  } catch (err) {
+    console.error("Error durante el arranque:", err);
+  }
 
+  // Quitar la pantalla de carga e invocar novedades
   setTimeout(() => {
-    splashScreen.style.opacity = '0';
-    setTimeout(() => {
-      splashScreen.style.visibility = 'hidden';
-      // Muestra el modal de novedades tras la carga inicial
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.style.display = 'none';
+        showNewsModal();
+      }, 400);
+    } else {
       showNewsModal();
-    }, 400);
+    }
   }, 1200);
 });
