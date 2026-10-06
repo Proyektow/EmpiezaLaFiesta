@@ -1,5 +1,5 @@
 /* ==========================================================
-   Empieza la Fiesta - Estilos Globales, Temas y Modales
+   #LezaDeFiesta - Estilos Globales, Temas y Modales
    ========================================================== */
 
 :root {
@@ -52,7 +52,7 @@ body {
   transition: background-color 0.3s;
 }
 
-/* Splash Screen */
+/* Splash Screen (Se oculta sola por CSS obligatoriamente tras 1.5s) */
 #splash-screen {
   position: fixed;
   inset: 0;
@@ -61,7 +61,14 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition: opacity 0.5s ease, visibility 0.5s;
+  animation: autoHideSplash 0.5s ease 1.5s forwards;
+  pointer-events: none;
+}
+
+@keyframes autoHideSplash {
+  0% { opacity: 1; visibility: visible; }
+  99% { opacity: 0; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; display: none !important; }
 }
 
 .splash-box {
