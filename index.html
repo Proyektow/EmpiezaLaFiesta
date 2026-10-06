@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0d0f17">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Empieza la Fiesta">
-  <title>Empieza la Fiesta</title>
+  <meta name="apple-mobile-web-app-title" content="#LezaDeFiesta">
+  <title>#LezaDeFiesta</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -16,11 +16,11 @@
 </head>
 <body data-theme="purple">
 
-  <!-- Splash Screen -->
+  <!-- Splash Screen (Auto-desvanecible por CSS) -->
   <div id="splash-screen">
     <div class="splash-box">
-      <div class="splash-icon">🍹</div>
-      <h1 class="splash-title">Empieza la Fiesta</h1>
+      <div class="splash-icon">🎉</div>
+      <h1 class="splash-title">#LezaDeFiesta</h1>
       <p class="splash-subtitle">Drinking & Party Game</p>
       <div class="loader-line">
         <div class="loader-track"></div>
@@ -31,11 +31,11 @@
   <!-- Barra Superior -->
   <header>
     <div class="brand" id="brandHomeBtn">
-      <span class="brand-name">Empieza la Fiesta</span>
+      <span class="brand-name">#LezaDeFiesta</span>
     </div>
     
     <div class="top-controls">
-      <!-- Botón de Novedades / Actualizaciones -->
+      <!-- Botón de Novedades -->
       <button class="btn-news-icon" id="btnOpenNews" title="Historial de Actualizaciones">📢</button>
 
       <!-- Botón Instalar PWA -->
@@ -63,11 +63,10 @@
     <section class="screen active" id="screenHome">
       <div class="greeting-box">
         <h2>¿Qué jugamos hoy?</h2>
-        <p>Elige tu modo favorito o combina los juegos.</p>
+        <p>Elige tu modo favorito o combina las cartas.</p>
       </div>
 
       <div class="modes-grid">
-        <!-- MODOS INDIVIDUALES Y MIXTO -->
         <article class="mode-card" data-launch="yoNunca">
           <div class="mode-icon">🍺</div>
           <div class="mode-details">
@@ -369,7 +368,7 @@
           <span style="font-size:1.4rem;">📢</span>
           <div>
             <h3 style="margin:0;">Actualizaciones</h3>
-            <span style="font-size:0.7rem; color:var(--text-muted);">Empieza la Fiesta</span>
+            <span style="font-size:0.7rem; color:var(--text-muted);">#LezaDeFiesta</span>
           </div>
         </div>
         <button class="btn-close-modal" id="btnCloseNewsX">✕</button>
@@ -377,23 +376,23 @@
 
       <div class="news-body">
         <div class="news-item">
-          <span class="version-badge">Versión 2.0 (Novedad)</span>
+          <span class="version-badge">Versión 2.5 (Novedad)</span>
           <strong>🔀 Modos Separados & Modo Mixto:</strong> Ahora puedes jugar a "Solo Yo Nunca", "Solo Probable" o activar el "Modo Mixto" para alternar ambas categorías.
         </div>
         <div class="news-item">
-          <span class="version-badge">Versión 1.8</span>
-          <strong>🔥 +600 Tarjetas Reales:</strong> 100 frases únicas por nivel sin textos repetidos.
+          <span class="version-badge">Versión 2.4</span>
+          <strong>🔥 +600 Tarjetas Reales:</strong> 100 frases únicas por nivel sin textos repetidos ni bucles.
         </div>
         <div class="news-item">
-          <span class="version-badge">Versión 1.5</span>
+          <span class="version-badge">Versión 2.3</span>
           <strong>🖐️ Deslizar Cartas (Swipe):</strong> Pasa tarjetas a izquierda o derecha con el dedo estilo Tinder.
         </div>
         <div class="news-item">
-          <span class="version-badge">Versión 1.2</span>
+          <span class="version-badge">Versión 2.2</span>
           <strong>🤫 Mímica Exprés:</strong> Temporizador de 10s para pasar el móvil, 12s de lectura privada y 45s de actuación.
         </div>
         <div class="news-item">
-          <span class="version-badge">Versión 1.0</span>
+          <span class="version-badge">Versión 2.1</span>
           <strong>🔊 Audio Web:</strong> Efectos sonoros de tictac, cuenta atrás y explosiones generados sin descargar archivos.
         </div>
       </div>
