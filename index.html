@@ -16,7 +16,7 @@
 </head>
 <body data-theme="purple">
 
-  <!-- Splash Screen (Se oculta sola por CSS obligatoriamente tras 1.5s) -->
+  <!-- Splash Screen (Auto-desvanecible por CSS) -->
   <div id="splash-screen">
     <div class="splash-box">
       <div class="splash-icon">🍹</div>
@@ -35,13 +35,9 @@
     </div>
     
     <div class="top-controls">
-      <!-- Botón de Novedades -->
       <button class="btn-news-icon" id="btnOpenNews" title="Historial de Actualizaciones">📢</button>
-
-      <!-- Botón Instalar PWA -->
       <button class="btn-install" id="btnInstallApp" style="display: none;">📲 Instalar</button>
 
-      <!-- Selector de Color -->
       <div class="theme-palette">
         <button class="theme-dot dot-purple active" data-color="purple" title="Morado"></button>
         <button class="theme-dot dot-blue" data-color="blue" title="Azul"></button>
@@ -56,10 +52,8 @@
     </div>
   </header>
 
-  <!-- Contenedor Principal de Pantallas -->
   <main>
-
-    <!-- PANTALLA 1: Inicio / Menú de Juegos -->
+    <!-- PANTALLA 1: Inicio -->
     <section class="screen active" id="screenHome">
       <div class="greeting-box">
         <h2>¿Qué jugamos hoy?</h2>
@@ -71,7 +65,7 @@
           <div class="mode-icon">🍺</div>
           <div class="mode-details">
             <h3>Solo Yo Nunca</h3>
-            <p>100 frases por nivel. Exclusivo de confesiones.</p>
+            <p>Frases por nivel. Exclusivo de confesiones.</p>
           </div>
         </article>
 
@@ -79,7 +73,7 @@
           <div class="mode-icon">🎯</div>
           <div class="mode-details">
             <h3>Solo ¿Quién es más probable?</h3>
-            <p>100 preguntas por nivel. A señalar culpables.</p>
+            <p>Preguntas directas a señalar culpables.</p>
           </div>
         </article>
 
@@ -87,7 +81,7 @@
           <div class="mode-icon">🔀</div>
           <div class="mode-details">
             <h3>Modo Mixto (Yo Nunca + Probable)</h3>
-            <p>Alterna cartas de ambos modos de forma aleatoria.</p>
+            <p>Alterna cartas de ambos modos al azar.</p>
           </div>
         </article>
 
@@ -119,7 +113,7 @@
           <div class="mode-icon">🤫</div>
           <div class="mode-details">
             <h3>Mímica Exprés</h3>
-            <p>Pasa el móvil, lee la palabra y 45s de actuación.</p>
+            <p>Pasa el móvil, lee en secreto y actúa.</p>
           </div>
         </article>
 
@@ -132,7 +126,6 @@
         </article>
       </div>
 
-      <!-- Participantes en Inicio -->
       <div class="home-participants-box">
         <div class="participants-head">
           <div>
@@ -153,18 +146,16 @@
 
     <!-- PANTALLA 2: Cartas (Yo Nunca / Probable / Mixto) -->
     <section class="screen" id="screenCards">
-      <!-- Selector de Modo de Juego -->
       <div class="game-mode-toggle">
         <button class="btn-mode-toggle" data-mode="yoNunca">🍺 Solo Yo Nunca</button>
         <button class="btn-mode-toggle" data-mode="probable">🎯 Solo Probable</button>
         <button class="btn-mode-toggle active" data-mode="mixto">🔀 Mixto</button>
       </div>
 
-      <!-- Selector de Intensidad -->
       <div class="intensity-bar">
-        <button class="btn-level" data-level="light">💧 Light (100)</button>
-        <button class="btn-level active" data-level="fiesta">✨ Fiesta (100)</button>
-        <button class="btn-level" data-level="hot">🔥 Hot (100)</button>
+        <button class="btn-level" data-level="light">💧 Light</button>
+        <button class="btn-level active" data-level="fiesta">✨ Fiesta</button>
+        <button class="btn-level" data-level="hot">🔥 Hot</button>
       </div>
 
       <div class="play-layout">
@@ -189,7 +180,7 @@
     <section class="screen" id="screenPrefieres">
       <div class="play-layout">
         <div class="game-card no-swipe">
-          <span class="card-badge">⚖️️ ¿QUÉ PREFIERES?</span>
+          <span class="card-badge">⚖️ ¿QUÉ PREFIERES?</span>
           <div class="dilemma-box">
             <button class="dilemma-btn" id="dilemmaOptA">Opción A</button>
             <div class="dilemma-divider">O BIEN</div>
@@ -236,7 +227,7 @@
       </div>
     </section>
 
-        <!-- PANTALLA 6: Mímica Exprés -->
+    <!-- PANTALLA 6: Mímica Exprés -->
     <section class="screen" id="screenMimica">
       <div class="play-layout">
         <div class="game-card no-swipe">
@@ -275,6 +266,20 @@
       </div>
     </section>
 
+    <!-- PANTALLA 7: La Bomba -->
+    <section class="screen" id="screenBomb">
+      <div class="play-layout">
+        <div class="game-card no-swipe" id="bombPlayCard">
+          <div class="bomb-icon" id="bombEmoji">💣</div>
+          <div class="card-text-wrapper">
+            <span class="sub-label">TEMA DE LA RONDA:</span>
+            <p class="question-text" id="bombSubject">Pulsa para activar la mecha</p>
+          </div>
+          <p class="card-rule" id="bombFootnote">Decid una palabra válida y pasad el móvil.</p>
+        </div>
+        <button class="btn-main-action" id="btnTriggerBomb">Activar Bomba</button>
+      </div>
+    </section>
   </main>
 
   <!-- Barra Inferior -->
@@ -348,8 +353,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Historial Completo de Actualizaciones -->
-    <!-- MODAL: Historial Completo de Actualizaciones -->
+  <!-- MODAL: Actualizaciones -->
   <div class="modal-wrapper" id="newsModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -357,7 +361,7 @@
           <span style="font-size:1.4rem;">📢</span>
           <div>
             <h3 style="margin:0;">Actualizaciones</h3>
-            <span style="font-size:0.7rem; color:var(--text-muted);">Empieza la Fiesta v3.0</span>
+            <span style="font-size:0.7rem; color:var(--text-muted);">Empieza la Fiesta v3.2</span>
           </div>
         </div>
         <button class="btn-close-modal" id="btnCloseNewsX">✕</button>
@@ -365,28 +369,20 @@
 
       <div class="news-body">
         <div class="news-item">
-          <span class="version-badge" style="background:#10b981; color:#fff;">Versión 3.0 (Gran Expansión)</span>
-          <strong>📦 +2.100 Tarjetas Reales:</strong> 250 frases escritas a mano por nivel en Yo Nunca (750 en total), 600 preguntas en Probable, 150 dilemas de ¿Qué Prefieres?, 150 consignas en Cultura 3s y 300 tarjetas en Verdad o Reto. ¡Cero bucles ni textos repetidos!
+          <span class="version-badge" style="background:#10b981; color:#fff;">Versión 3.2 (Estable)</span>
+          <strong>🛠️ Corrección Crítica de Carga:</strong> Sistema unificado sin bloqueos de inicio y motor de audio autónomo sin fallos.
+        </div>
+        <div class="news-item">
+          <span class="version-badge">Versión 3.0</span>
+          <strong>🤫 Mímica Controlada:</strong> Temporizador que se detiene automáticamente al salir de la pantalla y botón de Pausar / Reanudar.
         </div>
         <div class="news-item">
           <span class="version-badge">Versión 2.5</span>
-          <strong>⚡ Base de Datos Independiente (`db.js`):</strong> Separación de la biblioteca de preguntas de la lógica de la app para una carga instantánea y fluida sin consumir memoria extra.
+          <strong>🔀 Modos Separados & Mixto:</strong> Juega únicamente a Yo Nunca, únicamente a Probable o al Modo Mixto combinado.
         </div>
         <div class="news-item">
           <span class="version-badge">Versión 2.0</span>
-          <strong>🔀 Modos Separados & Modo Mixto:</strong> Elige entre jugar a "Solo Yo Nunca", "Solo Probable" o activa el "Modo Mixto" para alternar ambas categorías al azar.
-        </div>
-        <div class="news-item">
-          <span class="version-badge">Versión 1.5</span>
-          <strong>🖐️ Deslizar Cartas (Swipe):</strong> Pasa tarjetas a izquierda o derecha con el dedo estilo Tinder.
-        </div>
-        <div class="news-item">
-          <span class="version-badge">Versión 1.2</span>
-          <strong>🤫 Mímica Exprés:</strong> Temporizador de 10s para pasar el móvil, 12s de lectura privada y 45s de actuación.
-        </div>
-        <div class="news-item">
-          <span class="version-badge">Versión 1.0</span>
-          <strong>🔊 Audio Web & Offline:</strong> Efectos sonoros sintetizados y funcionamiento garantizado sin conexión a internet.
+          <strong>🖐️ Deslizar Cartas (Swipe):</strong> Pasa tarjetas deslizando a izquierda o derecha estilo Tinder.
         </div>
       </div>
 
@@ -395,3 +391,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Único script blindado autónomo -->
+  <script src="app.js"></script>
+</body>
+</html>
