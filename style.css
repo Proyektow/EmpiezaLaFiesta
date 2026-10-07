@@ -952,3 +952,25 @@ main {
 .btn-news-ok:active {
   transform: scale(0.98);
 }
+.btn-pause-mimica {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-pause-mimica.paused {
+  background: #f59e0b;
+  color: #000;
+  border-color: #f59e0b;
+}
+
+.btn-pause-mimica:active {
+  transform: scale(0.96);
+}
+
