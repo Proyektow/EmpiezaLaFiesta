@@ -132,6 +132,7 @@ const btnChooseTruth = document.getElementById('btnChooseTruth');
 const btnChooseDare = document.getElementById('btnChooseDare');
 const btnNextVR = document.getElementById('btnNextVR');
 
+// DOM Mímica
 const mimicaStepPass = document.getElementById('mimicaStepPass');
 const mimicaStepRead = document.getElementById('mimicaStepRead');
 const mimicaStepAct = document.getElementById('mimicaStepAct');
@@ -141,9 +142,12 @@ const btnActorReceived = document.getElementById('btnActorReceived');
 const secretWordDisplay = document.getElementById('secretWordDisplay');
 const timerReadDisplay = document.getElementById('timerReadDisplay');
 const timerActDisplay = document.getElementById('timerActDisplay');
+const btnPauseMimica = document.getElementById('btnPauseMimica');
 const btnMimicaGuessed = document.getElementById('btnMimicaGuessed');
 const btnNextMimicaRound = document.getElementById('btnNextMimicaRound');
 let mimicaTimer = null;
+let isMimicaPaused = false;
+let currentActSeconds = 45;
 
 const bombEmoji = document.getElementById('bombEmoji');
 const bombSubject = document.getElementById('bombSubject');
@@ -165,7 +169,45 @@ const btnOpenNews = document.getElementById('btnOpenNews');
 const btnCloseNewsX = document.getElementById('btnCloseNewsX');
 const btnDismissNews = document.getElementById('btnDismissNews');
 
-// --- 4. SWIPE GESTURES ---
+// --- 4. CONTROL DE TEMPORIZADOR DE MÍMICA ---
+function stopMimicaTimer() {
+  if (mimicaTimer) {
+    clearInterval(mimicaTimer);
+    mimicaTimer = null;
+  }
+}
+
+// --- 5. CAMBIO DE PANTALLAS ---
+function switchScreen(id) {
+  triggerHaptic();
+
+  // Si salimos de Mímica hacia otra pantalla, paramos el reloj al instante
+  if (currentScreen === 'screenMimica' && id !== 'screenMimica') {
+    stopMimicaTimer();
+  }
+
+  allScreens.forEach(s => s.classList.remove('active'));
+  const targetElement = document.getElementById(id);
+  if (targetElement) targetElement.classList.add('active');
+  currentScreen = id;
+
+  document.querySelectorAll('.nav-button').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.target === id) {
+      if (btn.dataset.forcedMode && btn.dataset.forcedMode !== activeCardGame) return;
+      btn.classList.add('active');
+    }
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateModeToggleButtons() {
+  document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === activeCardGame);
+  });
+}
+
+// --- 6. GESTOS DE DESLIZAMIENTO (SWIPE) ---
 let startX = 0, currentX = 0, isDragging = false;
 
 function initSwipe() {
@@ -215,7 +257,7 @@ function initSwipe() {
   }
 }
 
-// --- 5. RULETA SORPRESA Y MALDICIONES ---
+// --- 7. EVENTOS DE RULETA Y MALDICIONES ---
 function checkRandomEvents() {
   cardCounter++;
   if (cardCounter % 8 === 0) {
@@ -257,30 +299,7 @@ if (btnSpinSurpriseWheel) {
 if (btnCloseSurpriseModal) btnCloseSurpriseModal.addEventListener('click', () => { if (surpriseModal) surpriseModal.style.display = 'none'; });
 if (btnCloseCurseModal) btnCloseCurseModal.addEventListener('click', () => { if (curseModal) curseModal.style.display = 'none'; });
 
-// --- 6. CONTROL DE PANTALLAS ---
-function switchScreen(id) {
-  triggerHaptic();
-  allScreens.forEach(s => s.classList.remove('active'));
-  const targetElement = document.getElementById(id);
-  if (targetElement) targetElement.classList.add('active');
-  currentScreen = id;
-
-  document.querySelectorAll('.nav-button').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.target === id) {
-      if (btn.dataset.forcedMode && btn.dataset.forcedMode !== activeCardGame) return;
-      btn.classList.add('active');
-    }
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function updateModeToggleButtons() {
-  document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === activeCardGame);
-  });
-}
-
+// --- 8. CARTAS (YO NUNCA / PROBABLE / MIXTO) ---
 function nextCardAction() {
   if (checkRandomEvents()) return;
   triggerHaptic();
@@ -343,7 +362,7 @@ document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
   });
 });
 
-// Prefieres
+// ¿Qué Prefieres?
 function nextPrefieresAction() {
   triggerHaptic();
   const pair = DB.prefieres[Math.floor(Math.random() * DB.prefieres.length)];
@@ -410,10 +429,15 @@ if (btnChooseDare) {
 }
 if (btnNextVR) btnNextVR.addEventListener('click', nextVRAction);
 
-// Mímica Exprés
+// --- 9. MÍMICA EXPRÉS (TEMPORIZADORES BLINDADOS) ---
 function startMimicaRound() {
   triggerHaptic();
-  if (mimicaTimer) clearInterval(mimicaTimer);
+  stopMimicaTimer();
+  isMimicaPaused = false;
+  if (btnPauseMimica) {
+    btnPauseMimica.innerText = "⏸️ Pausar";
+    btnPauseMimica.classList.remove('paused');
+  }
 
   if (mimicaStepPass) mimicaStepPass.style.display = 'flex';
   if (mimicaStepRead) mimicaStepRead.style.display = 'none';
@@ -426,12 +450,17 @@ function startMimicaRound() {
   if (timerPassDisplay) timerPassDisplay.innerText = `${passSeconds}s`;
 
   mimicaTimer = setInterval(() => {
+    if (currentScreen !== 'screenMimica') {
+      stopMimicaTimer();
+      return;
+    }
+
     passSeconds--;
     if (passSeconds > 0) {
       if (timerPassDisplay) timerPassDisplay.innerText = `${passSeconds}s`;
       SoundEngine.tick();
     } else {
-      clearInterval(mimicaTimer);
+      stopMimicaTimer();
       startReadPhase();
     }
   }, 1000);
@@ -439,12 +468,13 @@ function startMimicaRound() {
 
 if (btnActorReceived) {
   btnActorReceived.addEventListener('click', () => {
-    if (mimicaTimer) clearInterval(mimicaTimer);
+    stopMimicaTimer();
     startReadPhase();
   });
 }
 
 function startReadPhase() {
+  stopMimicaTimer();
   SoundEngine.beep();
   if (mimicaStepPass) mimicaStepPass.style.display = 'none';
   if (mimicaStepRead) mimicaStepRead.style.display = 'flex';
@@ -454,42 +484,75 @@ function startReadPhase() {
   if (timerReadDisplay) timerReadDisplay.innerText = `${readSeconds}s`;
 
   mimicaTimer = setInterval(() => {
+    if (currentScreen !== 'screenMimica') {
+      stopMimicaTimer();
+      return;
+    }
+
     readSeconds--;
     if (readSeconds > 0) {
       if (timerReadDisplay) timerReadDisplay.innerText = `${readSeconds}s`;
       SoundEngine.tick();
     } else {
-      clearInterval(mimicaTimer);
+      stopMimicaTimer();
       startActPhase();
     }
   }, 1000);
 }
 
 function startActPhase() {
+  stopMimicaTimer();
   SoundEngine.fanfare();
   if (mimicaStepPass) mimicaStepPass.style.display = 'none';
   if (mimicaStepRead) mimicaStepRead.style.display = 'none';
   if (mimicaStepAct) mimicaStepAct.style.display = 'flex';
 
-  let actSeconds = 45;
-  if (timerActDisplay) timerActDisplay.innerText = actSeconds;
+  currentActSeconds = 45;
+  isMimicaPaused = false;
+  if (timerActDisplay) timerActDisplay.innerText = currentActSeconds;
 
+  runActInterval();
+}
+
+function runActInterval() {
+  stopMimicaTimer();
   mimicaTimer = setInterval(() => {
-    actSeconds--;
-    if (actSeconds > 0) {
-      if (timerActDisplay) timerActDisplay.innerText = actSeconds;
-      if (actSeconds <= 5) SoundEngine.tick();
-    } else {
-      clearInterval(mimicaTimer);
-      if (timerActDisplay) timerActDisplay.innerText = "¡TIEMPO!";
-      SoundEngine.explosion();
+    if (currentScreen !== 'screenMimica') {
+      stopMimicaTimer();
+      return;
+    }
+
+    if (!isMimicaPaused) {
+      currentActSeconds--;
+      if (currentActSeconds > 0) {
+        if (timerActDisplay) timerActDisplay.innerText = currentActSeconds;
+        if (currentActSeconds <= 5) SoundEngine.tick();
+      } else {
+        stopMimicaTimer();
+        if (timerActDisplay) timerActDisplay.innerText = "¡TIEMPO!";
+        SoundEngine.explosion();
+      }
     }
   }, 1000);
 }
 
+if (btnPauseMimica) {
+  btnPauseMimica.addEventListener('click', () => {
+    triggerHaptic();
+    isMimicaPaused = !isMimicaPaused;
+    if (isMimicaPaused) {
+      btnPauseMimica.innerText = "▶️ Reanudar";
+      btnPauseMimica.classList.add('paused');
+    } else {
+      btnPauseMimica.innerText = "⏸️ Pausar";
+      btnPauseMimica.classList.remove('paused');
+    }
+  });
+}
+
 if (btnMimicaGuessed) {
   btnMimicaGuessed.addEventListener('click', () => {
-    if (mimicaTimer) clearInterval(mimicaTimer);
+    stopMimicaTimer();
     SoundEngine.fanfare();
     if (timerActDisplay) timerActDisplay.innerText = "¡ACERTADO! 🎉";
   });
@@ -497,7 +560,7 @@ if (btnMimicaGuessed) {
 
 if (btnNextMimicaRound) btnNextMimicaRound.addEventListener('click', startMimicaRound);
 
-// Bomba
+// --- 10. LA BOMBA ---
 if (btnTriggerBomb) {
   btnTriggerBomb.addEventListener('click', () => {
     triggerHaptic();
@@ -552,7 +615,7 @@ document.querySelectorAll('.nav-button').forEach(btn => {
 
 if (brandHomeBtn) brandHomeBtn.addEventListener('click', () => switchScreen('screenHome'));
 
-// --- 7. TEMAS Y PARTICIPANTES ---
+// --- 11. TEMAS Y PARTICIPANTES ---
 function applyTheme(name) {
   try {
     document.body.setAttribute('data-theme', name);
@@ -641,7 +704,7 @@ if (btnCloseM) {
   });
 }
 
-// --- 8. NOVEDADES / ACTUALIZACIONES ---
+// --- 12. NOVEDADES / ACTUALIZACIONES ---
 function showNewsModal() {
   if (newsModal) newsModal.style.display = 'flex';
 }
@@ -666,7 +729,7 @@ if (btnDismissNews) {
   });
 }
 
-// --- 9. BOTÓN NATIVO PWA & OFFLINE ---
+// --- 13. BOTÓN NATIVO PWA & OFFLINE ---
 let deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -695,7 +758,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-// INICIALIZACIÓN BLINDADA
+// --- 14. INICIALIZACIÓN BLINDADA ---
 window.addEventListener('DOMContentLoaded', () => {
   try {
     applyTheme(savedTheme);
