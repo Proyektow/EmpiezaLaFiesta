@@ -236,7 +236,7 @@
       </div>
     </section>
 
-    <!-- PANTALLA 6: Mímica Exprés -->
+        <!-- PANTALLA 6: Mímica Exprés -->
     <section class="screen" id="screenMimica">
       <div class="play-layout">
         <div class="game-card no-swipe">
@@ -264,26 +264,14 @@
             <span class="sub-label">¡ACTÚA YA! (MÁX 45s):</span>
             <div class="timer-display-big timer-active" id="timerActDisplay">45</div>
             <p class="card-rule">Sin palabras ni sonidos. ¡Que adivinen!</p>
-            <button class="btn-success-guessed" id="btnMimicaGuessed">🎉 ¡Acertado!</button>
+            <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 6px;">
+              <button class="btn-pause-mimica" id="btnPauseMimica">⏸️ Pausar</button>
+              <button class="btn-success-guessed" id="btnMimicaGuessed">🎉 ¡Acertado!</button>
+            </div>
           </div>
 
         </div>
         <button class="btn-main-action" id="btnNextMimicaRound">Siguiente Ronda ➔</button>
-      </div>
-    </section>
-
-    <!-- PANTALLA 7: La Bomba -->
-    <section class="screen" id="screenBomb">
-      <div class="play-layout">
-        <div class="game-card no-swipe" id="bombPlayCard">
-          <div class="bomb-icon" id="bombEmoji">💣</div>
-          <div class="card-text-wrapper">
-            <span class="sub-label">TEMA DE LA RONDA:</span>
-            <p class="question-text" id="bombSubject">Pulsa para activar la mecha</p>
-          </div>
-          <p class="card-rule" id="bombFootnote">Decid una palabra válida y pasad el móvil.</p>
-        </div>
-        <button class="btn-main-action" id="btnTriggerBomb">Activar Bomba</button>
       </div>
     </section>
 
