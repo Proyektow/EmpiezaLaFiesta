@@ -1,4 +1,4 @@
-const CACHE_NAME = 'empieza-fiesta-v4';
+const CACHE_NAME = 'fiesta-cache-v5-clean';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
@@ -7,7 +7,6 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
-      // Elimina cualquier caché anterior que pudiera tener código bloqueado
       return Promise.all(keys.map((k) => caches.delete(k)));
     }).then(() => self.clients.claim())
   );
